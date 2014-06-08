@@ -1,28 +1,18 @@
-## "household_power_consumption.txt" must be in working directory.
-
-## Reading file
-file <- file("household_power_consumption.txt")
-f <- read.csv2(file, na.strings = "?")
-
-## Subsetting
-fsub <- f[f$Date == "1/2/2007" | f$Date == "2/2/2007",1:9]
-
-## Transforming to tidy data
-for (i in 1:9) {
-     fsub[,i] <- as.character(fsub[,i])
-     if (i == 1) {
-          fsub[,i] <- as.Date(fsub[,i], format = "%d/%m/%Y")
-     }
-
-     if (i >= 3) {
-          fsub[,i] <- as.numeric(fsub[,i])
-     }
+power <- read.csv2("household_power_consumption.txt")
+power[,1] <- as.Date(as.character(power[,1]), format = "%d/%m/%Y")
+power[,2] <- as.character(power[,2])
+for (i in 3:9)
+{
+     power[,i] <- as.numeric(as.character(power[,i]))
 }
 
-## Plot
-plot(fsub$Global_active_power, type = "l", ylab = "Global Active Power (kilowatts)", xlab="", xaxt='n')
-axis(1, at = c(1, 1441, 2880), labels = c("Thu", "Fri", "Sat"))
+tempsub <- power[power$Date == "2007-02-01" | power$Date == "2007-02-02",]
 
-# Copy to PNG
-dev.copy(png, file = "plot2.png")
+temp <- as.character(paste(tempsub[,1], tempsub[,2]))
+temp <- strptime(temp, format = "%Y-%m-%d %H:%M:%S")
+sub <- cbind(tempsub[,1],temp,tempsub[,3:9])
+
+par(mar = c(3,5,2,2))
+plot(sub$temp, sub$Global_active_power, type = "l", xlab = "", ylab = "Global Active Power (kilowatts)")
+dev.copy(png, file = "plot2.png", width = 480, height = 480)
 dev.off()
